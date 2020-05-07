@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello Business!</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="static/js/vendor/Chart.min.js"></script>
+
+    <!--  Link MultiSelect Javascript (Plugin automatically installed) -->
+    <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
+    <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
+
+    <!--  Link VCalendar Javascript (Plugin automatically installed) -->
+    <script src='https://unpkg.com/v-calendar'></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="static/js/utils.js"></script>
+    <script src="static/js/bar.js"></script>
+
+</head>
+
+<body>
+<section class="section">
+    <section class="hero is-fullheight is-primary is-bold">
+        <div class="hero-head" id="enable-vue-here">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="/">
+
+                    </a>
+                    <div class="navbar-burger" @click="showNav = !showNav" :class="{ 'is-active': showNav }">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="navbar-menu" :class="{ 'is-active': showNav }">
+                    <div class="navbar-end">
+                        <a class="navbar-item" href="/dummies">
+                            Dummies
+                        </a>
+                        <a class="navbar-item" href="/bigquery">
+                            Big Query
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            <!-- Hero content: will be in the middle -->
+            <div class="hero-body">
+                <div class="container has-text-centered">
+                    <h1 class="title">
+                        Big Query
+                    </h1>
+                    <div class="container" id="controls-container">
+                        <p class="subtitle is-3">
+                            Client control panel
+                        </p>
+
+                        <div class="container" id="filters-toolbar">
+                            <p class="subtitle is-4">
+                                Filters
+                            </p>
+                            <div class="columns has-text-centered is-fullwidth">
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Date</div>
+                                    <input type="radio" id="range" value="range" v-model="filters_dateMode">
+                                    <label for="range">Range</label>
+                                    <input type="radio" id="since" value="since" v-model="filters_dateMode">
+                                    <label for="since">Since</label>
+                                    <input type="radio" id="last" value="last" v-model="filters_dateMode">
+                                    <label for="last">Last</label>
+                                    <input type="radio" id="all" value="all" v-model="filters_dateMode"
+                                           v-on:change="getAvailableFilters()">
+                                    <label for="all">All</label>
+                                    <br>
+                                    <div v-if="filters_dateMode === 'since' ">
+                                        <v-date-picker
+                                                v-model='filters_dateSince_value'
+                                                v-on:change='getAvailableFilters()'
+                                        />
+                                    </div>
+                                    <div v-else-if="filters_dateMode === 'last'">
+                                        Last <input type="number" min=0 v-model="filters_dateLast_value"
+                                                    v-on:change='getAvailableFilters()'> months
+                                    </div>
+                                    <div v-else-if="filters_dateMode === 'range'">
+                                        <v-date-picker
+                                                mode='range'
+                                                v-model='filters_dateRange_value'
+                                                v-on:change='getAvailableFilters()'
+                                        />
+                                    </div>
+                                    <div v-else></div>
+
+
+                                </div>
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Pôles</div>
+                                    <multiselect
+                                            v-model="filters_poles_value"
+                                            :options="filters_poles_options"
+                                            :multiple="true"
+                                            track-by="key"
+                                            @input='getAvailableFilters()'
+                                            :custom-label="multiSelect_customLabel">
+                                    </multiselect>
+                                </div>
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Topics</div>
+                                    <multiselect
+                                            v-model="filters_topics_value"
+                                            :options="filters_topics_options"
+                                            :multiple="true"
+                                            track-by="key"
+                                            @input='getAvailableFilters()'
+                                            :custom-label="multiSelect_customLabel">
+                                    </multiselect>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container" id="aggregator-toolbar">
+                            <p class="subtitle is-4">
+                                Aggregators </p>
+                            <div class="columns has-text-centered">
+
+                                <div class="column is-narrow is-4">
+                                    <div class="label">X</div>
+                                    <multiselect
+                                            v-model="aggregators_x_value"
+                                            :options="aggregators_x_options"
+                                            :multiple="false"
+                                            track-by="key"
+                                            :custom-label="multiSelect_customLabel">
+                                    </multiselect>
+                                </div>
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Y</div>
+                                    <multiselect
+                                            v-model="aggregators_y_value"
+                                            :options="aggregators_y_options"
+                                            :multiple="false"
+                                            track-by="key"
+                                            :custom-label="multiSelect_customLabel">
+                                    </multiselect>
+                                </div>
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Hue</div>
+                                    <multiselect
+                                            v-model="aggregators_hue_value"
+                                            :options="aggregators_hue_options"
+                                            :multiple="false"
+                                            track-by="key"
+                                            :custom-label="multiSelect_customLabel">
+                                    </multiselect>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container" id="options-toolbar">
+                            <p class="subtitle is-4">
+                                Options </p>
+                            <div class="columns has-text-centered">
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Title</div>
+                                    <input v-model="chartOptions.title">
+                                </div>
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Y label</div>
+                                    <input v-model="chartOptions.yLabel">
+                                </div>
+                                <div class="column is-narrow is-4">
+                                    <div class="label">Stacked</div>
+                                    <input type="checkbox" v-model="chartOptions.stacked" number>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-block">
+                            <button v-on:click="drawChartFromSelection()"
+                                    class="button is-info is-fullwidth"
+                                    id="client-control-validate-btn">
+                                Validate
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="container" id="chart-container">
+
+                        <p class="subtitle is-3">
+                            Chart result </p>
+
+                        <div class="alert alert-info" v-show="chartIsLoading">
+                            Loading...
+                        </div>
+                        <div class="alert alert-danger" v-show="chartIsErrored">
+                            Something went wrong!
+                        </div>
+                        <div class="wrapper">
+                            <canvas class="chart-container" style="position: relative; height:20vh; width:80vw"
+                                    id="chart-0"></canvas>
+                        </div>
+                        <div class="panel-block">
+                            <div class="columns has-text-centered is-fullwidth">
+                                <div class="column is-narrow is-12">
+
+                                    <button v-on:click="chartIsSaving = true"
+                                            class="button is-info is-fullwidth"
+                                            id="client-save-btn">
+                                        Save
+                                    </button>
+                                    <div v-show="chartIsSaving">
+                                        <div class="modal is-active" id="addon_modal" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title text-center">Saving chart...</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Name of your chart: <input placeholder="my cool chart"
+                                                                                   v-model="chartName">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button v-on:click="uploadSelectionToFile()"
+                                                                class="button is-warning is-fullwidth">
+                                                            Validate
+                                                        </button>
+                                                        <button v-on:click="chartIsSaving = false"
+                                                                class="button is-warning is-fullwidth">
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="column is-narrow is-12">
+                                    <button class="button is-info is-fullwidth"
+                                            v-on:click="drawChartFromFile()">
+                                        Download
+                                    </button>
+                                    <multiselect
+                                            v-model="chartName"
+                                            :options="availableChartNames"
+                                            :multiple="false"
+                                            track-by="text"
+                                            :custom-label="multiSelect_customLabel">
+                                    </multiselect>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+<script>
+    //clone is equivalent of lodash.cloneDeep
+    //necessary because chart.js messes with the data object, inserting circular references that break Vue's reactivity
+
+    // This is helpers, should be moved in specific module
+    Array.prototype.includesObject = function (object) {
+        return this.find(listObject => JSON.stringify(listObject) == JSON.stringify(object)) !== undefined
+    };
+
+    new Vue({
+        components: {
+            Multiselect: window.VueMultiselect.default,
+            // VSelect: window.VueSelect.default
+            // Dropdown: vueDropDown,
+        },
+        el: '#enable-vue-here',
+
+        data: function () {
+            return {
+                showNav: false,
+
+                filters_dateMode: null, // else all, range, since, last
+                filters_dateSince_value: null,
+                filters_dateLast_value: null,
+                filters_dateRange_value: {
+                    start: null, // new Date(2018, 0, 1), // Jan 1st, 2018
+                    end: new Date() // today
+                },
+                filters_poles_options: [],
+                filters_poles_value: [],
+                filters_topics_options: [],
+                filters_topics_value: [],
+
+                aggregators_x_options: [
+                    {'key': 'topics_text', 'text': 'Topics'},
+                    {'key': 'round_date', 'text': 'Dates'},
+                    {'key': 'poles', 'text': 'Poles'}
+                ],
+                aggregators_hue_options: [
+                    {'key': 'topics_text', 'text': 'Topics'},
+                    {'key': 'round_date', 'text': 'Dates'},
+                    {'key': 'poles', 'text': 'Poles'}
+                ],
+                aggregators_y_options: [
+                    {'key': 'count_ptests', 'text': 'Number of tests'},
+                    {'key': 'avg_scores', 'text': 'Average scores'},
+                    {'key': 'nb_certifications', 'text': 'Number of certifications'}
+                ],
+                aggregators_x_value: null,
+                aggregators_y_value: null,
+                aggregators_hue_value: null,
+
+                chart: null,
+                chartData: null,
+                chartIsLoading: false,
+                chartIsErrored: false,
+                chartIsSaving: false,
+                chartOptions: {
+                    title: '',
+                    colors: ['blue', 'red', 'orange', 'green', 'purple'],
+                    stacked: true,
+                    yLabel: ''
+                },
+                availableChartNames: [],
+                chartName: null
+            }
+        },
+        watch: {
+            // whenever question changes, this function will run
+            'chartOptions.title': function (newTitle) {
+                this.chart.options.title.text = newTitle;
+                this.chart.options.title.display = true;
+                this.chart.update()
+            },
+            'chartOptions.yLabel': function (newYLabel) {
+                this.chart.options.scales.yAxes[0].scaleLabel['labelString'] = newYLabel;
+                this.chart.update()
+            },
+            // this does not work !
+            'chartOptions.stacked': function (newStacked) {
+                this.chart.options.scales.xAxes[0]['stacked'] = newStacked;
+                this.chart.options.scales.yAxes[0]['stacked'] = newStacked;
+            },
+            filters_dateSince_value: function (newSince) {
+                this.filters_dateRange_value = {
+                    start: newSince,
+                    end: new Date(), // today
+                }
+            },
+            filters_dateLast_value: function (newLast) {
+                let start = new Date();
+                start.setMonth(start.getMonth() - newLast);
+                this.filters_dateRange_value = {
+                    start: start,
+                    end: new Date(),
+                }
+            }
+
+        },
+        methods: {
+            multiSelect_customLabel(option) {
+                return `${option.text}`
+            },
+            getAvailableFilters(on_change = 'date') {
+                let postData = {on_change: on_change, filters: this.getFilters()};
+                this.$http.post('/bigquery/getAvailableFilters', JSON.stringify(postData))
+                    .then(response => {
+                            console.log(response.body.available_topics);
+                            // apply dateRange and poles filters to topic options and current selection
+                            this.filters_topics_options = response.body.available_topics;
+                            this.filters_topics_value = this.filters_topics_value.filter(x => this.filters_topics_options.includesObject(x));
+                            // apply dateRange and topics filters to poles options and current selection
+                            this.filters_poles_options = response.body.available_poles;
+                            this.filters_poles_value = this.filters_poles_value.filter(x => this.filters_poles_options.includesObject(x))
+                        }
+                    )
+            },
+            getDateFilters() {
+                return {
+                    mode: this.filters_dateMode,
+                    begin: this.filters_dateMode === 'since' ? filters_dateSince_value : this.filters_dateRange_value.end,
+                    end: this.filters_dateRange_value.end,
+                    months_number: this.filters_dateLast_value
+                }
+            },
+            getFilters() {
+                return {
+                    date: this.getDateFilters(),
+                    topics: this.filters_topics_value,
+                    poles: this.filters_poles_value
+                };
+            },
+            getAggregators() {
+                return {
+                    x: this.aggregators_x_value,
+                    y: this.aggregators_y_value,
+                    hue: this.aggregators_hue_value,
+                };
+            },
+
+            getOptions() {
+                return this.chartOptions
+            },
+            setOptions(values) {
+                this.chartOptions = values
+            },
+            setAggregators(aggregators) {
+                this.aggregators_x_value = aggregators.x;
+                this.aggregators_y_value = aggregators.y;
+                this.aggregators_hue_value = aggregators.hue;
+
+            },
+            setFilters(filters) {
+                this.setDateFilters(filters.date);
+                this.filters_topics_value = filters.topics;
+            },
+            setDateFilters(values) {
+                this.filters_dateMode = values.mode;
+                this.filters_dateSince_value = values.begin;
+                this.filters_dateRange_value.end = values.begin;
+                this.filters_dateRange_value.end = values.end;
+                this.filters_dateLast_value = values.months_number
+
+            },
+            getClientSelection() {
+                const filters = this.getFilters();
+                const aggregators = this.getAggregators();
+                const options = this.getOptions();
+                const clientSelection = {filters: filters, aggregators: aggregators, options: options};
+                console.log(clientSelection);
+                return clientSelection
+            },
+            setClientSelection(values) {
+
+                this.setAggregators(values.aggregators);
+                this.setFilters(values.filters);
+                this.setOptions(values.options);
+            },
+            resetChart() {
+                if (this.chart != null) {
+                    this.chart.destroy();
+                }
+            },
+            uploadSelectionToFile() {
+
+                const chartName = this.chartName;
+
+                clientSelection = this.getClientSelection();
+                // post selection to server
+                // todo: maybe use same path than `getChartData`
+                postData = JSON.stringify({client_selection: clientSelection, chart_name: chartName})
+                this.$http.post('/bigquery/uploadClientSelection', postData)
+                    .catch(error => {
+                        console.log(error);
+                        // todo: give an error feedback
+                    })
+                    .finally(() => (this.chartIsSaving = false));
+
+                this.availableChartNames.push({text: chartName});
+            },
+            downloadSelectionFromFile(chartName) {
+                // todo: maybe use same path than `getChartData`
+                postData = JSON.stringify({chart_name: chartName});
+                this.$http.post('/bigquery/downloadClientSelection', postData)
+                    .catch(error => {
+                        console.log(error);
+                        // todo: give an error feedback
+                    }).then(response => {
+                    const clientSelectionValues = response.body.client_selection;
+                    this.setClientSelection(clientSelectionValues);
+                });
+
+
+            },
+            drawChart() {
+                // destroy chart
+                this.resetChart();
+                this.chart = draw_bar_chart2("chart-0", this.chartData,
+                    this.chartOptions);
+            },
+            drawChartFromSelection() {
+                this.chartIsErrored = false;
+                this.chartIsLoading = true;
+                clientSelection = this.getClientSelection();
+                this.$http.post('/bigquery/getChartData', JSON.stringify(clientSelection))
+                    .then(response => {
+                            console.log(response.body.chart_data);
+                            this.chartData = response.body.chart_data;
+                            this.drawChart()
+                        }
+                    ).catch(error => {
+                    console.log(error);
+                    this.chartIsErrored = true;
+                })
+                    .finally(() => (this.chartIsLoading = false));
+            },
+            drawChartFromFile() {
+                const chartName = this.chartName.text;
+                if (chartName === null) {
+                    console.log('Client should select a chart! ');
+                    return
+                }
+                this.downloadSelectionFromFile(chartName);
+                this.drawChartFromSelection()
+            }
+        }
+
+    })
+    ;
+
+</script>
+</body>
+</html>
