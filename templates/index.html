@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script source="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/style.css">
+
 </head>
 <body>
 <div id="enable-vue-here">
@@ -27,6 +29,9 @@
                 </div>
                 <div class="navbar-menu" :class="{ 'is-active': showNav }">
                     <div class="navbar-end">
+                        <a class="navbar-item" href="/">
+                            Home
+                        </a>
                         <a class="navbar-item" href="/dummies">
                             Dummies
                         </a>
@@ -40,7 +45,80 @@
         <!-- Hero content: will be in the middle -->
         <div class="hero-body">
             <div class="container has-text-centered">
-                Some text here !
+                <p class="subtitle is-1">
+                    Web Data Visualization with Flask, Chart.JS, Vue.JS, Ajax and Big Query
+                </p>
+                <p class="subtitle is-2">
+                    Context
+                </p>
+
+                This is a toy project, to take some framework in hands.
+                The goal is to do draw some custom graphs from big database. <br>
+
+                <div class="container has-text-left">
+                    <ul style="list-style: square inside; margin-left:15pt">
+                        The specifications are the following :
+                        <li>Data should come from a BigQuery dataset</li>
+                        <li>For security purpose, the query job should belong to server
+                            (use AJAX to make client and server communicate)
+                        </li>
+                        <li>Client should be able to apply selection filters (ie. WHERE)
+                            to the data from a control panel
+                        </li>
+                        <li>Client should be able to choose which variable to plot on the chart</li>
+                        <li>Client should be able to custom the properties of the chart (title, label ...)</li>
+                        <li>Client should be able to save the chart parameters and re-load it later on</li>
+                    </ul>
+                </div>
+                <p class="subtitle is-2">
+                    Libraries
+                </p>
+                <p class="subtitle is-3"> Flask </p>
+                <p class="paragraph">
+                    <a href="https://flask.palletsprojects.com/en/1.1.x/"> Flask </a>
+                    is a minimalistic python framework for building web apps. It provides one
+                    with tools, libraries and technologies that allow to build a web application.
+                    <span class="underline">I chose to use Flask framework for simplicity purpose </span>
+                </p>
+                <p>
+
+                </p>
+                <p class="subtitle is-3">
+                    Chart.JS
+                </p>
+                <p class="paragraph">
+                    <a href="https://chartjs.org/">Chart.JS</a> is a popular open source library that helps us to
+                    plot data in web applications.
+                    It is highly customizable, but configuring all of its options remains
+                    a challenge ! Hence, I started to explore it from a simple
+                    example where I ploted random data and then built upon it to real data.
+                    <span class="underline">I chose to use Chart.JS framework for
+                    its clean design and versatility. </span>
+
+                <p class="subtitle is-3">
+                    Vue.JS
+                </p>
+                <p class="paragraph">
+                    <a href="https://vuejs.org/">Vue.JS</a> is a recent javascript framework claiming to be approchable,
+                    versatile and
+                    performant.
+                    It is basically a way of hacking HTML DOM, by watching variables, updating states
+                    accordingly without big effort.
+                    <span class="underline">I wanted to try it here to handle client selection from control panel
+                        (see page on BigQuery)</span>
+                </p>
+                <p class="subtitle is-3">
+                    Big Query
+                </p>
+                <p class="paragraph">
+                    <a href="https://cloud.google.com/bigquery?hl=en">Big Query</a>
+                    is a fully-managed, serverless data warehouse that enables scalable,
+                    cost-effective and fast analysis over petabytes of data.
+                    It is a serverless Software as a Service (SaaS) that supports
+                    querying using ANSI SQL.
+                    <span class="underline">I wanted to try it here to use available public datasets
+                        - for now, it's one of my own dataset (see page on BigQuery)  -.  </span>
+                </p>
             </div>
         </div>
     </section>
@@ -55,4 +133,5 @@
         }
     });
 </script>
+
 </body>

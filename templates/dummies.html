@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hello Business!</title>
+    <title>Hello ChartJS!</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
@@ -17,147 +17,149 @@
 </head>
 
 <body>
-<section class="section">
-    <section class="hero is-fullheight is-primary is-bold">
-        <div class="hero-head" id="enable-vue-here">
-            <nav class="navbar">
-                <div class="navbar-brand">
+<section class="hero is-fullheight is-primary is-bold">
+    <div class="hero-head" id="enable-vue-here">
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="/">
+
+                </a>
+                <div class="navbar-burger" @click="showNav = !showNav" :class="{ 'is-active': showNav }">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="navbar-menu" :class="{ 'is-active': showNav }">
+                <div class="navbar-end">
                     <a class="navbar-item" href="/">
-
+                        Home
                     </a>
-                    <div class="navbar-burger" @click="showNav = !showNav" :class="{ 'is-active': showNav }">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
+                    <a class="navbar-item" href="/dummies">
+                        Dummies
+                    </a>
+                    <a class="navbar-item" href="/bigquery">
+                        Big Query
+                    </a>
                 </div>
-                <div class="navbar-menu" :class="{ 'is-active': showNav }">
-                    <div class="navbar-end">
-                        <a class="navbar-item" href="/dummies">
-                            Dummies
-                        </a>
-                        <a class="navbar-item" href="/bigquery">
-                            Big Query
-                        </a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-        <!-- Hero content: will be in the middle -->
-        <div class="hero-body">
-            <div class="container has-text-centered">
+            </div>
+        </nav>
+    </div>
+    <!-- Hero content: will be in the middle -->
+    <div class="hero-body">
+        <div class="container has-text-centered">
+            <div class="container">
+                <h1 class="title">
+                    Hello Chart.JS
+                </h1>
                 <div class="container">
-                    <h1 class="title">
-                        Business Intelligence
-                    </h1>
-                    <div class="container">
-                        <p class="subtitle is-3">
-                            Generate dummy data
-                        </p>
-                        <div class="toolbar">
-                            <div class="control">
-                                <div class="select">
-                                    <select id="chartSelect" onchange="switchChart()">
-                                        <option value="bar">Bar</option>
-                                        <option value="pie">Pie</option>
-                                        <option value="doughnuts">Doughnuts</option>
-                                        <option value="polarArea">Polar</option>
-                                    </select>
-                                </div>
-
-                                <button class="button is-light" onclick="randomize()">Randomize</button>
-                                <button class="button is-light" onclick="addDataset()">Add Dataset</button>
-                                <button class="button is-light" onclick="removeDataset()">Remove Dataset</button>
+                    <p class="subtitle is-3">
+                        Generate dummy data
+                    </p>
+                    <div class="toolbar">
+                        <div class="control">
+                            <div class="select">
+                                <select id="chartSelect" onchange="switchChart()">
+                                    <option value="bar">Bar</option>
+                                    <option value="pie">Pie</option>
+                                    <option value="doughnuts">Doughnuts</option>
+                                    <option value="polarArea">Polar</option>
+                                </select>
                             </div>
+
+                            <button class="button is-light" onclick="randomize()">Randomize</button>
+                            <button class="button is-light" onclick="addDataset()">Add Dataset</button>
+                            <button class="button is-light" onclick="removeDataset()">Remove Dataset</button>
                         </div>
-                        <div class="wrapper">
-                            <canvas id="dummy-chart" width=null height=null></canvas>
-                        </div>
+                    </div>
+                    <div class="wrapper">
+                        <canvas id="dummy-chart" width=null height=null></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    <script>
-        new Vue({
-            el: '#enable-vue-here',
-            data: {
-                showNav: false
+    </div>
+</section>
+<script>
+    new Vue({
+        el: '#enable-vue-here',
+        data: {
+            showNav: false
+        }
+    });
+
+    var glob = Object();
+    glob.chart = null;
+    glob.chart2 = null;
+    var DATA_COUNT = 5;
+    var utils = Samples.utils;
+    utils.srand(110);
+
+    function generateData() {
+        return utils.numbers({
+            count: DATA_COUNT,
+            min: 0,
+            max: 100
+        });
+    }
+
+    function generateColors(random = false, r0 = 100, g0 = 0, b0 = 0,) {
+        return utils.colors({
+            count: DATA_COUNT,
+            r0: r0,
+            g0: g0,
+            b0: b0,
+            random: random
+        });
+    }
+
+    var data = {
+        datasets: [{
+            data: generateData(),
+            backgroundColor: generateColors(true),
+        }]
+    };
+
+    function randomize() {
+        glob.chart.data.datasets.forEach(function (dataset) {
+            dataset.data = generateData();
+            dataset.backgroundColor = generateColors(true);
+        });
+        glob.chart.update();
+    }
+
+    function addDataset() {
+        glob.chart.data.datasets.push({
+            data: generateData(),
+            backgroundColor: generateColors(true),
+        });
+        glob.chart.update();
+    }
+
+    function removeDataset() {
+        glob.chart.data.datasets.shift();
+        glob.chart.update();
+    }
+
+    function switchChart() {
+        console.log('Switching chart');
+        try {
+            glob.chart.destroy();
+        } catch (e) {
+        }
+        let type_id = document.getElementById("chartSelect").value;
+        glob.chart = new Chart('dummy-chart', {
+            type: type_id === 'doughnuts' ? 'pie' : type_id,
+            data: data,
+            options: {
+                legend: false,
+                tooltips: false,
+                cutoutPercentage: type_id === 'doughnuts' ? 50 : 0,
             }
         });
+    }
 
-        var glob = Object();
-        glob.chart = null;
-        glob.chart2 = null;
-        var DATA_COUNT = 5;
-        var utils = Samples.utils;
-        utils.srand(110);
-
-        function generateData() {
-            return utils.numbers({
-                count: DATA_COUNT,
-                min: 0,
-                max: 100
-            });
-        }
-
-        function generateColors(random = false, r0 = 100, g0 = 0, b0 = 0,) {
-            return utils.colors({
-                count: DATA_COUNT,
-                r0: r0,
-                g0: g0,
-                b0: b0,
-                random: random
-            });
-        }
-
-        var data = {
-            datasets: [{
-                data: generateData(),
-                backgroundColor: generateColors(true),
-            }]
-        };
-
-        function randomize() {
-            glob.chart.data.datasets.forEach(function (dataset) {
-                dataset.data = generateData();
-                dataset.backgroundColor = generateColors(true);
-            });
-            glob.chart.update();
-        }
-
-        function addDataset() {
-            glob.chart.data.datasets.push({
-                data: generateData(),
-                backgroundColor: generateColors(true),
-            });
-            glob.chart.update();
-        }
-
-        function removeDataset() {
-            glob.chart.data.datasets.shift();
-            glob.chart.update();
-        }
-
-        function switchChart() {
-            console.log('Switching chart');
-            try {
-                glob.chart.destroy();
-            } catch (e) {
-            }
-            let type_id = document.getElementById("chartSelect").value;
-            glob.chart = new Chart('dummy-chart', {
-                type: type_id === 'doughnuts' ? 'pie' : type_id,
-                data: data,
-                options: {
-                    legend: false,
-                    tooltips: false,
-                    cutoutPercentage: type_id === 'doughnuts' ? 50 : 0,
-                }
-            });
-        }
-
-    </script>
+</script>
 </section>
 </body>
 </html>
