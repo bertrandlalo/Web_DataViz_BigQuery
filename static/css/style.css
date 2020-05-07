@@ -8,3 +8,7 @@ canvas {
     width: 400px;
     margin: 30px;
 }
+
+span.underline {
+    font-weight: 900
+}
